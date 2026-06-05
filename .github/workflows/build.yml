@@ -3,9 +3,6 @@ name: Build and Deploy
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,24 +15,38 @@ jobs:
       with:
         haxe-version: 4.2.5
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
     - name: Install Haxelib dependencies
       run: |
+        haxelib newrepo
         haxelib install hxcpp > /dev/null
         haxelib install lime > /dev/null
         haxelib install openfl > /dev/null
         haxelib install flixel > /dev/null
-        haxelib git flixel-addons https://github.com/HaxeFlixel/flixel-addons.git > /dev/null
-        haxelib git flixel-ui https://github.com/HaxeFlixel/flixel-ui.git > /dev/null
+        haxelib set lime $(haxelib list lime | grep lime)
+        haxelib set openfl $(haxelib list openfl | grep openfl)
+        haxelib set flixel $(haxelib list flixel | grep flixel)
 
     - name: Build HTML5
-      run: lime build html5 -final
+      run: |
+        haxelib run lime build html5 -final
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Commit and push build files
-      if: github.event_name == 'push'
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add build/html5/ -f
-        git diff-index --quiet HEAD || git commit -m "Auto-build: Compile HaxeFlixel for HTML5"
-        git push
+        if [ -d "build/html5" ]; then
+          git add build/html5 -f
+          git diff --cached --quiet || (git commit -m "Auto-build: Compile HaxeFlixel for HTML5 [skip ci]" && git push)
+        else
+          echo "Build directory not found"
+          exit 1
+        fi
       continue-on-error: true
