@@ -1,0 +1,41 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Haxe
+      uses: krdlab/setup-haxe@v1
+      with:
+        haxe-version: 4.2.5
+
+    - name: Install Haxelib dependencies
+      run: |
+        haxelib install hxcpp > /dev/null
+        haxelib install lime > /dev/null
+        haxelib install openfl > /dev/null
+        haxelib install flixel > /dev/null
+        haxelib git flixel-addons https://github.com/HaxeFlixel/flixel-addons.git > /dev/null
+        haxelib git flixel-ui https://github.com/HaxeFlixel/flixel-ui.git > /dev/null
+
+    - name: Build HTML5
+      run: lime build html5 -final
+
+    - name: Commit and push build files
+      if: github.event_name == 'push'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add build/html5/ -f
+        git diff-index --quiet HEAD || git commit -m "Auto-build: Compile HaxeFlixel for HTML5"
+        git push
+      continue-on-error: true
