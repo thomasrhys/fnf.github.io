@@ -48,7 +48,7 @@ jobs:
 
     - name: Build HTML5
       run: |
-        haxelib run lime build html5 -final
+        haxelib run lime test html5
 
     - name: Prepare Pages artifact
       run: |
