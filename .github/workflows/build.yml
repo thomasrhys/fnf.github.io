@@ -3,12 +3,22 @@ name: Build and Deploy
 on:
   push:
     branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Haxe
       uses: krdlab/setup-haxe@v1
@@ -18,35 +28,33 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: 16
 
     - name: Install Haxelib dependencies
       run: |
         haxelib newrepo
-        haxelib install hxcpp > /dev/null
-        haxelib install lime > /dev/null
-        haxelib install openfl > /dev/null
-        haxelib install flixel > /dev/null
-        haxelib set lime $(haxelib list lime | grep lime)
-        haxelib set openfl $(haxelib list openfl | grep openfl)
-        haxelib set flixel $(haxelib list flixel | grep flixel)
+        haxelib install hxcpp
+        haxelib install lime
+        haxelib install openfl
+        haxelib install flixel
 
     - name: Build HTML5
       run: |
         haxelib run lime build html5 -final
 
-    - name: Configure Git
+    - name: Prepare Pages artifact
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        mkdir -p public
+        cp -r export/release/html5/* public/ || cp -r build/html5/* public/
 
-    - name: Commit and push build files
-      run: |
-        if [ -d "build/html5" ]; then
-          git add build/html5 -f
-          git diff --cached --quiet || (git commit -m "Auto-build: Compile HaxeFlixel for HTML5 [skip ci]" && git push)
-        else
-          echo "Build directory not found"
-          exit 1
-        fi
-      continue-on-error: true
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
