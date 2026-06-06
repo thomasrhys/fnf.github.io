@@ -47,23 +47,27 @@ jobs:
       run: |
         haxe -version
         haxelib list
-        haxelib run hxp --help
 
-    - name: Build HTML5 (HXProject)
+    # IMPORTANT: initialise HXProject properly
+    - name: Initialise HXProject
       run: |
-        echo "Building using HXProject..."
+        echo "Initialising hxp project system..."
         haxelib run hxp project.hxp html5
 
-    - name: Find build output
+    - name: Build HTML5
       run: |
-        echo "Searching for output..."
+        echo "Building HTML5..."
+        haxelib run hxp project.hxp html5
+
+    - name: Locate output
+      run: |
         find . -type d -name "html5" || true
+        find . -type d -name "export" || true
 
     - name: Prepare Pages folder
       run: |
         mkdir -p public
 
-        # Common HXProject/FNF outputs
         if [ -d "export/release/html5/bin" ]; then
           cp -r export/release/html5/bin/* public/
         elif [ -d "export/html5/bin" ]; then
@@ -71,7 +75,7 @@ jobs:
         elif [ -d "export/release/html5" ]; then
           cp -r export/release/html5/* public/
         else
-          echo "ERROR: No HTML5 output found"
+          echo "ERROR: No build output found"
           ls -R
           exit 1
         fi
