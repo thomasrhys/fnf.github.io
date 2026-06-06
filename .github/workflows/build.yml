@@ -46,9 +46,10 @@ jobs:
       run: |
         haxelib run lime setup
 
-    - name: Build HTML5
-      run: |
-        haxelib run lime test html5
+- name: Build HTML5
+  run: |
+    haxelib run lime setup
+    haxelib run lime test html5
 
     - name: Prepare Pages artifact
       run: |
