@@ -31,7 +31,7 @@ jobs:
       with:
         node-version: 16
 
-    - name: Install dependencies
+    - name: Install Haxelib dependencies
       run: |
         haxelib newrepo
         haxelib install hxp
@@ -47,20 +47,25 @@ jobs:
       run: |
         haxelib run lime setup
 
-    - name: Build HTML5
+    - name: Debug environment
       run: |
-        haxelib run lime build html5
+        haxe -version
+        haxelib list
+
+    - name: Build HTML5 (HXProject)
+      run: |
+        echo "Building with project.hxp..."
+        haxelib run lime build html5 project.hxp
 
     - name: Locate build output
       run: |
-        echo "Searching for HTML5 build output..."
+        echo "Searching for HTML5 output..."
         find . -type d -name "html5" || true
 
     - name: Prepare Pages folder
       run: |
         mkdir -p public
 
-        # Most FNF builds output here:
         if [ -d "export/release/html5/bin" ]; then
           cp -r export/release/html5/bin/* public/
         elif [ -d "export/html5/bin" ]; then
