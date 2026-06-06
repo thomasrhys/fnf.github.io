@@ -21,17 +21,12 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # ----------------------------
-    # ⚡ SPEED BOOST (Haxelib cache)
-    # ----------------------------
     - name: Cache Haxelib
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.haxelib
-        key: haxelib-${{ runner.os }}-${{ hashFiles('**/haxelib.json') }}
-        restore-keys: |
-          haxelib-${{ runner.os }}-
+        path: ~/.haxelib
+        key: haxelib-${{ runner.os }}
+        restore-keys: haxelib-
 
     - name: Setup Haxe
       uses: krdlab/setup-haxe@v1
@@ -46,8 +41,6 @@ jobs:
     - name: Install Haxelib dependencies
       run: |
         haxelib newrepo
-        haxelib install hxp
-        haxelib install hxcpp
         haxelib install lime 8.3.2
         haxelib install openfl 9.5.2
         haxelib install flixel 6.1.2
@@ -55,42 +48,10 @@ jobs:
         haxelib install flixel-ui
         haxelib install hscript
 
-    - name: Setup Lime
-      run: |
-        haxelib run lime setup
-
-    - name: Debug environment
-      run: |
-        haxe -version
-        haxelib list
-
-    # ----------------------------
-    # HXPROJECT STEP (prepare ONLY)
-    # ----------------------------
-    - name: Run HXProject preprocessing
-      run: |
-        echo "Running hxp preprocessing..."
-        haxelib run hxp project.hxp
-
-    # ----------------------------
-    # BUILD STEP (actual compile)
-    # ----------------------------
     - name: Build HTML5
       run: |
-        echo "Building HTML5 with Lime..."
-        haxelib run lime build html5
+        haxelib run lime build html5 -final
 
-    # ----------------------------
-    # FIND OUTPUT
-    # ----------------------------
-    - name: Locate build output
-      run: |
-        find . -type d -name "html5" || true
-        find . -type d -name "export" || true
-
-    # ----------------------------
-    # PREPARE GITHUB PAGES
-    # ----------------------------
     - name: Prepare Pages folder
       run: |
         mkdir -p public
@@ -99,18 +60,13 @@ jobs:
           cp -r export/release/html5/bin/* public/
         elif [ -d "export/html5/bin" ]; then
           cp -r export/html5/bin/* public/
-        elif [ -d "export/release/html5" ]; then
-          cp -r export/release/html5/* public/
         else
-          echo "ERROR: No HTML5 output found"
+          echo "Build output not found"
           ls -R
           exit 1
         fi
 
-    # ----------------------------
-    # UPLOAD ARTIFACT
-    # ----------------------------
-    - name: Upload Pages artifact
+    - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: public
@@ -118,7 +74,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v4
