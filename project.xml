@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+    
+    <meta title="FNF GitHub Pages Build" package="com.fnf.web" version="1.0.0" />
+
+    <app main="Main" file="FNF" path="export" />
+
+    <window width="1280" height="720" fps="60" background="#000000" />
+
+    <source path="source" />
+    <assets path="assets" />
+
+    <haxelib name="openfl" />
+    <haxelib name="lime" />
+    <haxelib name="flixel" />
+    <haxelib name="flixel-addons" />
+    <haxelib name="flixel-ui" />
+    <haxelib name="hscript" />
+
+    <haxedef name="web" />
+    <haxedef name="html5" />
+
+</project>
