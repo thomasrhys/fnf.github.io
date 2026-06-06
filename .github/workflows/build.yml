@@ -56,8 +56,8 @@ jobs:
 
     - name: Build HTML5
       run: |
-        echo "Building HTML5..."
-        haxelib run hxp project.hxp html5
+        haxelib run hxp project.hxp
+        haxelib run lime build html5
 
     - name: Locate output
       run: |
