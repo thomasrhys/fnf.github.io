@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
     - name: Setup Haxe
       uses: krdlab/setup-haxe@v1
@@ -30,7 +31,7 @@ jobs:
       with:
         node-version: 16
 
-    - name: Install Haxelib dependencies
+    - name: Install dependencies
       run: |
         haxelib newrepo
         haxelib install hxp
@@ -46,26 +47,33 @@ jobs:
       run: |
         haxelib run lime setup
 
-- name: Build HTML5
-  run: |
-    haxelib run lime setup
-    haxelib run lime test html5
+    - name: Build HTML5
+      run: |
+        haxelib run lime build html5
 
-    - name: Prepare Pages artifact
+    - name: Locate build output
+      run: |
+        echo "Searching for HTML5 build output..."
+        find . -type d -name "html5" || true
+
+    - name: Prepare Pages folder
       run: |
         mkdir -p public
 
-        # FNF usually outputs here:
+        # Most FNF builds output here:
         if [ -d "export/release/html5/bin" ]; then
           cp -r export/release/html5/bin/* public/
+        elif [ -d "export/html5/bin" ]; then
+          cp -r export/html5/bin/* public/
         elif [ -d "build/html5" ]; then
           cp -r build/html5/* public/
         else
-          echo "Build output not found!"
+          echo "ERROR: No HTML5 output found"
+          ls -R
           exit 1
         fi
 
-    - name: Upload artifact
+    - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: public
