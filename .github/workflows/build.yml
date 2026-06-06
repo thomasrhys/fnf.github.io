@@ -18,9 +18,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # ----------------------------
+    # Checkout (WITH SUBMODULES)
+    # ----------------------------
     - name: Checkout repo
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
+    # ----------------------------
+    # Cache Haxelib (speed boost)
+    # ----------------------------
     - name: Cache Haxelib
       uses: actions/cache@v4
       with:
@@ -28,6 +36,9 @@ jobs:
         key: haxelib-${{ runner.os }}
         restore-keys: haxelib-
 
+    # ----------------------------
+    # Setup Haxe
+    # ----------------------------
     - name: Setup Haxe
       uses: krdlab/setup-haxe@v1
       with:
@@ -38,9 +49,13 @@ jobs:
       with:
         node-version: 16
 
+    # ----------------------------
+    # Install dependencies (FIXED)
+    # ----------------------------
     - name: Install Haxelib dependencies
       run: |
         haxelib newrepo
+        haxelib install hxp
         haxelib install lime 8.3.2
         haxelib install openfl 9.5.2
         haxelib install flixel 6.1.2
@@ -48,10 +63,25 @@ jobs:
         haxelib install flixel-ui
         haxelib install hscript
 
+    # ----------------------------
+    # Debug (VERY IMPORTANT for FNF builds)
+    # ----------------------------
+    - name: Debug environment
+      run: |
+        haxe -version
+        haxelib list
+
+    # ----------------------------
+    # Build HTML5
+    # ----------------------------
     - name: Build HTML5
       run: |
+        echo "Building FNF HTML5..."
         haxelib run lime build html5 -final
 
+    # ----------------------------
+    # Prepare Pages folder
+    # ----------------------------
     - name: Prepare Pages folder
       run: |
         mkdir -p public
@@ -66,7 +96,10 @@ jobs:
           exit 1
         fi
 
-    - name: Upload artifact
+    # ----------------------------
+    # Upload artifact
+    # ----------------------------
+    - name: Upload Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: public
@@ -74,6 +107,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v4
