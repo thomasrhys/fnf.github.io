@@ -76,9 +76,17 @@ jobs:
     # ----------------------------
     - name: Build HTML5
       run: |
-        echo "Building FNF HTML5..."
-        haxelib run lime build html5 -final
+        echo "Current directory:"
+        pwd
 
+        echo "Files:"
+        ls -la
+
+        echo "Project files:"
+        find . -maxdepth 2 -type f | sort
+
+        echo "Building..."
+        haxelib run lime build html5 -final -verbose
     # ----------------------------
     # Prepare Pages folder
     # ----------------------------
