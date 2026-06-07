@@ -62,6 +62,12 @@ jobs:
 
         haxelib list
 
+    - name: Haxelib info
+      run: |
+        haxelib version
+        haxe -version
+        git --version
+
         haxelib run hmm install
         
     - name: Check installed libraries
