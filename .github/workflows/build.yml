@@ -54,15 +54,16 @@ jobs:
     # ----------------------------
     - name: Install HMM and dependencies
       run: |
-        haxelib newrepo
-
-        haxelib --global git haxelib https://github.com/FunkinCrew/haxelib.git
-        haxelib --global git hmm https://github.com/FunkinCrew/hmm.git
+        haxelib setup ~/haxelib
 
         haxelib install hxp
 
-        haxelib run hmm install
+        haxelib git hmm https://github.com/FunkinCrew/hmm.git
 
+        haxelib list
+
+        haxelib run hmm install
+        
     - name: Check installed libraries
       run: |
         haxelib list
