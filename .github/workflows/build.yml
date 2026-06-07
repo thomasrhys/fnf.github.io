@@ -52,16 +52,16 @@ jobs:
     # ----------------------------
     # Install dependencies (FIXED)
     # ----------------------------
-    - name: Install Haxelib dependencies
+    - name: Install HMM and dependencies
       run: |
         haxelib newrepo
+
+        haxelib --global git haxelib https://github.com/FunkinCrew/haxelib.git
+        haxelib --global git hmm https://github.com/FunkinCrew/hmm.git
+
         haxelib install hxp
-        haxelib install lime 8.3.2
-        haxelib install openfl 9.5.2
-        haxelib install flixel 6.1.2
-        haxelib install flixel-addons
-        haxelib install flixel-ui
-        haxelib install hscript
+
+        hmm install
 
     # ----------------------------
     # Debug (VERY IMPORTANT for FNF builds)
