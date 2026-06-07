@@ -61,7 +61,7 @@ jobs:
 
         haxelib install hxp
 
-        hmm install
+        haxelib run hmm install
 
     # ----------------------------
     # Debug (VERY IMPORTANT for FNF builds)
